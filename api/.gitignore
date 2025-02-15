@@ -1,0 +1,6 @@
+node_modules
+config
+migrations
+/models
+seeders
+.env
