@@ -1,5 +1,4 @@
-const Tasks = require("../models/Tasks");
-
+const { Tasks, Categories } = require("../models");
 class TasksController {
   async index(req, res) {
     const taks = await Tasks.findAll();
@@ -8,18 +7,29 @@ class TasksController {
   }
 
   async store(req, res) {
-    const { title, description, status, priority } = req.body;
+    const { title, description, status, priority, categoryIds } = req.body;
 
-    const tasks = await Tasks.create({
-      title,
-      description,
-      status,
-      priority,
-    });
+    try {
+      const task = await Tasks.create({ title, description, status, priority });
 
-    return res
-      .status(201)
-      .json({ message: "Tarefa criada com sucesso!", tasks });
+      if (categoryIds) {
+        await task.setCategories(categoryIds);
+      }
+
+      return res.json(
+        await Tasks.findByPk(task.id, {
+          include: [
+            {
+              model: Categories,
+              as: "categories",
+            },
+          ],
+        })
+      );
+    } catch (error) {
+      console.error("Erro:", error);
+      return res.status(500).json({ error: error.message });
+    }
   }
 
   async update(req, res) {
@@ -54,7 +64,14 @@ class TasksController {
   }
   async show(req, res) {
     const { id } = req.params;
-    const tasks = await Tasks.findOne({ where: { id } });
+    const tasks = await Tasks.findByPk(id, {
+      include: [
+        {
+          model: Categories,
+          as: "categories",
+        },
+      ],
+    });
 
     return res
       .status(200)
