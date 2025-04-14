@@ -1,12 +1,14 @@
 const express = require("express");
 const sequelize = require("./config/database");
 const tasksRouter = require("./routes/tasksRouter");
+const categoriesRouter = require("./routes/categoriesRouter");
 
 const app = express();
 const port = 3000;
 
 app.use(express.json());
 app.use("/tasks", tasksRouter);
+app.use("/categories", categoriesRouter);
 
 sequelize.sync().then(() => {
   console.log("Banco de dados sincronizado");
