@@ -34,7 +34,7 @@ class TasksController {
 
   async update(req, res) {
     const { id } = req.params;
-    const { title, description, status, priority } = req.body;
+    const { title, description, status, priority, categoryIds } = req.body;
 
     const task = await Tasks.findByPk(id);
 
@@ -48,7 +48,10 @@ class TasksController {
       task.status = status;
       task.priority = priority;
     }
-    task.save();
+    await task.save();
+    if (categoryIds) {
+      await task.setCategories(categoryIds);
+    }
     return res.status(200).json({ message: "Task atualizada com sucesso" });
   }
   async delete(req, res) {
